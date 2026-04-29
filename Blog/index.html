@@ -1,1 +1,80 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta charset="UTF-8">
+<title>365 Breaths Blog</title>
+
+<style>
+body { background:#000; color:#fff; font-family:Arial; padding:20px; }
+h1, h2 { text-align:center; }
+.grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:20px; margin-top:20px; }
+.card { border:1px solid #333; padding:15px; border-radius:10px; }
+.card h3 { margin-top:0; }
+a { color:#4da6ff; text-decoration:none; display:block; margin:5px 0; }
+a:hover { text-decoration:underline; }
+.lang { margin-top:40px; }
+</style>
+
+</head>
+
+<body>
+
+<h1>365 Breaths Blog</h1>
+
+<div id="content"></div>
+
+<script>
+const repo = "365breaths/365breaths.github.io";
+
+fetch(`https://api.github.com/repos/${repo}/contents/Blog`)
+.then(res => res.json())
+.then(files => {
+
+    let data = {};
+
+    files.forEach(f => {
+        if (!f.name.endsWith(".html") || f.name === "index.html") return;
+
+        let parts = f.name.replace(".html","").split("_");
+
+        let theme = parts[0];
+        let lang = parts[1] || "UNK";
+        let num = parts[2] || Math.random();
+
+        if (!data[lang]) data[lang] = {};
+        if (!data[lang][theme]) data[lang][theme] = [];
+
+        data[lang][theme].push({file:f.name, num:num});
+    });
+
+    let html = "";
+
+    Object.keys(data).sort().forEach(lang => {
+
+        html += `<div class="lang"><h2>${lang}</h2><div class="grid">`;
+
+        Object.keys(data[lang]).sort().forEach(theme => {
+
+            html += `<div class="card"><h3>${theme.toUpperCase()}</h3>`;
+
+            data[lang][theme]
+            .sort((a,b) => a.num - b.num)
+            .forEach((item, i) => {
+                html += `<a href="${item.file}">Citation ${i+1}</a>`;
+            });
+
+            html += "</div>";
+        });
+
+        html += "</div></div>";
+    });
+
+    document.getElementById("content").innerHTML = html;
+
+});
+</script>
+
+</body>
+</html>
 
